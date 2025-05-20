@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Chintu AI - The Friendly Sun AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg-main: linear-gradient(to bottom, #fffbe6 0%, #f8fafc 100%);
+      --container-bg: rgba(255,255,255,0.9);
+      --container-border: #f0efe2;
+      --container-shadow: 0 8px 32px 0 rgba(31,38,135,0.13), 0 1.5px 12px 2px rgba(255,255,255,0.10);
+      --container-gloss: linear-gradient(110deg,rgba(255,255,255,0.31) 0%,rgba(255,255,255,0.09) 65%,rgba(255,255,255,0) 100%);
+      --text-main: #22223b;
+      --text-subtle: #57577d;
+      --user-bg: #fef7c6;
+      --user-color: #1a1533;
+      --bot-bg: rgba(255, 250, 200, 0.7);
+      --bot-color: #22223b;
+      --input-bg: #fefbe6;
+      --input-color: #1a1533;
+      --input-border: #f5e9b2;
+      --button-bg: linear-gradient(90deg, #ffe480 0%, #ffd000 100%);
+      --button-color: #1a1533;
+      --star-color: #ffd000;
+    }
+    [data-theme="dark"] {
+      --bg-main: linear-gradient(to bottom, #232037 0%, #111925 100%);
+      --container-bg: rgba(28, 26, 36, 0.96);
+      --container-border: #393952;
+      --container-shadow: 0 8px 32px 0 rgba(31,38,135,0.25), 0 1.5px 12px 2px rgba(31,38,135,0.07);
+      --container-gloss: linear-gradient(110deg,rgba(255,255,255,0.13) 0%,rgba(255,255,255,0.06) 65%,rgba(255,255,255,0) 100%);
+      --text-main: #f6f8fa;
+      --text-subtle: #bdbddd;
+      --user-bg: #191919;
+      --user-color: #ffe97a;
+      --bot-bg: rgba(255,255,200,0.13);
+      --bot-color: #ffe97a;
+      --input-bg: rgba(40,40,50,1);
+      --input-color: #f6f8fa;
+      --input-border: #393952;
+      --button-bg: linear-gradient(90deg, #ffd000 0%, #ffde80 100%);
+      --button-color: #232037;
+      --star-color: #ffd000;
+    }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg-main);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      position: relative;
+      padding: 0;
+      transition: background 0.6s;
+    }
+    .theme-toggle {
+      position: absolute;
+      top: 1.5rem;
+      right: 2.5rem;
+      z-index: 30;
+      background: var(--container-bg);
+      border: 1.5px solid var(--container-border);
+      border-radius: 9999px;
+      padding: 0.6rem 1.12rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-main);
+      box-shadow: 0 0 12px 0 rgba(0,0,0,0.03);
+      transition: background 0.3s, border 0.3s;
+      gap: 0.5rem;
+      user-select: none;
+    }
+    .theme-toggle svg {
+      width: 1.5em; height: 1.5em;
+      vertical-align: middle;
+    }
+    .boot-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-main);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: bootFadeIn 1.1s cubic-bezier(.4,0,.2,1);
+      transition: background 0.5s;
+    }
+    @keyframes bootFadeIn { from { opacity: 0; } to   { opacity: 1; } }
+    .sun-logo {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: rotateSun 2.5s linear infinite;
+      filter: drop-shadow(0 0 16px var(--star-color));
+    }
+    @keyframes rotateSun {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+    .boot-text {
+      font-family: 'UnifrakturCook', cursive;
+      color: #e2b200;
+      font-size: 2.0rem;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 10px #ffe980aa;
+      margin-bottom: 0.5em;
+      user-select: none;
+    }
+    .boot-loader {
+      width: 60px;
+      height: 7px;
+      border-radius: 5px;
+      background: #ffe48f;
+      overflow: hidden;
+      margin: 12px auto;
+      position: relative;
+    }
+    .boot-bar {
+      position: absolute;
+      left: 0; top: 0;
+      width: 0%; height: 100%;
+      background: linear-gradient(90deg, #ffe480 0%, #ffd000 100%);
+      border-radius: 5px;
+      transition: width 1.6s cubic-bezier(.41,.47,.32,.96);
+    }
+    .popup-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(30, 27, 60, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1100;
+      animation: fadeIn 0.4s;
+      backdrop-filter: blur(4px);
+    }
+    .popup-card {
+      background: var(--container-bg);
+      border-radius: 22px;
+      box-shadow: 0 0 32px 2px #f3e1b5be;
+      padding: 2.5rem 2.2rem 2rem 2.2rem;
+      max-width: 340px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.6s;
+      border: 1.5px solid var(--container-border);
+    }
+    .popup-title {
+      font-family: 'UnifrakturCook', cursive;
+      color: #e2b200;
+      font-size: 2rem;
+      text-align: center;
+      margin-bottom: 1.2rem;
+      user-select: none;
+    }
+    .popup-label {
+      color: #b0942c;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 1.07rem;
+      text-align: left;
+      width: 100%;
+    }
+    .popup-card input {
+      width: 100%;
+      border-radius: 14px;
+      border: 1.2px solid #ffe59c;
+      padding: 0.7rem 1.2rem;
+      margin-bottom: 1.4rem;
+      font-size: 1rem;
+      font-family: 'Poppins', sans-serif;
+      background: #fff9e0;
+      color: #b0942c;
+      transition: border 0.2s;
+    }
+    .popup-card input:focus {
+      border: 1.5px solid #ffd000;
+      outline: none;
+    }
+    .popup-card button {
+      background: linear-gradient(90deg, #ffe480 0%, #ffd000 100%);
+      color: #1a1533;
+      border: none;
+      border-radius: 9999px;
+      padding: 0.7rem 2.2rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-top: 0.2rem;
+      cursor: pointer;
+      box-shadow: 0 0 12px #ffe48055;
+      transition: background 0.2s;
+    }
+    .popup-card button:hover {
+      background: linear-gradient(90deg, #ffd000 0%, #ffe480 100%);
+    }
+    .popup-desc {
+      color: #a0905a;
+      font-size: 0.98rem;
+      margin-bottom: 1.4rem;
+      text-align: center;
+      line-height: 1.4;
+      user-select: none;
+    }
+    .sun-ray {
+      position: absolute;
+      width: 16px;
+      height: 3px;
+      background: var(--star-color);
+      border-radius: 4px;
+      opacity: 0.85;
+    }
+    .stars { display: none; }
+    /* Main chat styles */
+    .chintu-container {
+      background: var(--container-bg);
+      border-radius: 28px;
+      border: 1.5px solid var(--container-border);
+      box-shadow: var(--container-shadow);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      max-width: 660px;
+      width: 100%;
+      min-width: 300px;
+      color: var(--text-main);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      height: 92vh;
+      max-height: 870px;
+      box-sizing: border-box;
+      overflow: hidden;
+      margin: auto;
+      transition: background 0.5s, border 0.5s;
+      border-radius: 22px;
+      animation: fadeIn 1.2s cubic-bezier(.4,0,.2,1) 1;
+    }
+    .chintu-container::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 44px;
+      border-radius: 22px 22px 90px 90px / 22px 22px 50px 50px;
+      background: var(--container-gloss);
+      opacity: 0.82;
+      pointer-events: none;
+      z-index: 11;
+      filter: blur(0.5px);
+      mix-blend-mode: lighten;
+    }
+    .chintu-header {
+      font-family: 'UnifrakturCook', cursive;
+      font-size: 2.1rem;
+      text-align: left;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding-top: 1.8rem;
+      padding-bottom: 0.6rem;
+      padding-left: 2.1rem;
+      letter-spacing: 1px;
+      margin-bottom: 0.35rem;
+      z-index: 20;
+      position: relative;
+    }
+    .chintu-header .logo-sun {
+      width: 38px;
+      height: 38px;
+      margin-right: 0.1rem;
+      filter: drop-shadow(0 0 8px var(--star-color));
+      animation: rotateSun 12s linear infinite;
+    }
+    .messages {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 0 2.1rem 0.5rem 2.1rem;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(120,120,160,0.13) transparent;
+      word-break: break-word;
+      scroll-behavior: smooth;
+      min-height: 80px;
+    }
+    .messages::-webkit-scrollbar { width: 6px; }
+    .messages::-webkit-scrollbar-thumb { background-color: rgba(120,120,160,0.10); border-radius: 3px; }
+    .message {
+      max-width: 78%;
+      margin-bottom: 1.2rem;
+      padding: 1rem 1.4rem;
+      border-radius: 18px;
+      font-size: 1.13rem;
+      line-height: 1.6;
+      word-wrap: break-word;
+      white-space: pre-line;
+      word-break: break-word;
+      hyphens: auto;
+      box-shadow: 0 1px 18px 0 rgba(90,90,120,0.04);
+    }
+    .bot-message {
+      background: var(--bot-bg);
+      color: var(--bot-color);
+      border-top-left-radius: 0;
+      align-self: flex-start;
+      margin-left: 0.1rem;
+      white-space: pre-wrap;
+      animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1) 1;
+    }
+    .user-message {
+      background: var(--user-bg);
+      color: var(--user-color);
+      border-top-right-radius: 0;
+      align-self: flex-end;
+      margin-right: 0.1rem;
+      white-space: pre-wrap;
+      animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1) 1;
+      font-weight: 500;
+    }
+    .input-area {
+      margin: 0 2.1rem 1.5rem 2.1rem;
+      display: flex;
+      gap: 1rem;
+      position: relative;
+    }
+    .input-area input {
+      flex-grow: 1;
+      border-radius: 9999px;
+      border: 1.5px solid var(--input-border);
+      padding: 1rem 1.5rem;
+      font-size: 1.13rem;
+      outline: none;
+      background: var(--input-bg);
+      color: var(--input-color);
+      min-width: 0;
+      box-shadow: 0 1px 10px 0 rgba(0,0,0,0.04);
+      transition: background 0.3s, border 0.3s;
+    }
+    .input-area input::placeholder {
+      color: #bababa;
+      opacity: 0.8;
+    }
+    .input-area input:focus {
+      background: rgba(255,255,255,0.98);
+      border: 1.5px solid #ffd000;
+    }
+    [data-theme="dark"] .input-area input:focus {
+      background: rgba(68,68,90,0.97);
+    }
+    .input-area button {
+      background: var(--button-bg);
+      color: var(--button-color);
+      border: none;
+      border-radius: 9999px;
+      padding: 0 2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.3s;
+      box-shadow: 0 0 10px 0 rgba(217,178,90,0.14);
+      flex-shrink: 0;
+      font-size: 1.13rem;
+    }
+    .input-area button:hover {
+      background: linear-gradient(90deg, #ffd000 0%, #ffde80 100%);
+    }
+    .bot-typing { font-style: italic; color: var(--text-subtle); opacity: 0.7; padding-left: 1.2rem; padding-bottom: 0.2rem;}
+    @media (max-width: 768px) {
+      .chintu-container { max-width: 98vw; padding: 0;}
+      .chintu-header, .messages, .input-area { padding-left: 1.2rem; padding-right: 1.2rem;}
+      .chintu-header { font-size: 1.25rem; padding-top: 1.2rem; }
+    }
+    @media (max-width: 480px) {
+      .chintu-container { max-width: 100vw; border-radius: 0; min-width: unset;}
+      .chintu-header, .messages, .input-area { padding-left: 0.5rem; padding-right: 0.5rem;}
+      .input-area { margin-left: 0.5rem; margin-right: 0.5rem;}
+    }
+  </style>
+</head>
+<body>
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle Dark/Light Mode">
+    <span id="theme-toggle-icon">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="6" fill="#FFD000"/><path stroke="#FFD000" stroke-width="2" d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.07-7.07l-1.42 1.42M6.35 17.66l-1.41 1.41m12.73 0l-1.42-1.41M6.34 6.34L4.93 4.93"/></svg>
+    </span>
+    <span id="theme-toggle-label">Light</span>
+  </button>
+  <!-- Boot Screen -->
+  <div class="boot-screen" id="boot-screen" role="dialog" aria-label="Booting up Chintu AI">
+    <div style="position: relative; width: 100px; height: 100px;">
+      <svg class="sun-logo" viewBox="0 0 110 110" fill="none">
+        <circle cx="55" cy="55" r="32" fill="#FFD000" stroke="#FFE480" stroke-width="6"/>
+        <circle cx="55" cy="55" r="19" fill="#FFF9CA" stroke="#FFD000" stroke-width="3"/>
+        <circle cx="60" cy="52" r="4.5" fill="#FFFDE4"/>
+        <circle cx="47" cy="62" r="2.8" fill="#FFFDE4"/>
+        <ellipse cx="62" cy="60" rx="5" ry="2" fill="#fffbe6" opacity="0.7"/>
+      </svg>
+      <div class="sun-ray" style="top:-10px; left:42px; transform: rotate(0deg);"></div>
+      <div class="sun-ray" style="bottom:-10px; left:42px; transform: rotate(180deg);"></div>
+      <div class="sun-ray" style="top:42px; left:-10px; width:3px; height:16px; transform: rotate(90deg);"></div>
+      <div class="sun-ray" style="top:42px; right:-10px; width:3px; height:16px; transform: rotate(-90deg);"></div>
+      <div class="sun-ray" style="top:13px; left:13px; transform: rotate(45deg);"></div>
+      <div class="sun-ray" style="top:13px; right:13px; transform: rotate(-45deg);"></div>
+      <div class="sun-ray" style="bottom:13px; left:13px; transform: rotate(135deg);"></div>
+      <div class="sun-ray" style="bottom:13px; right:13px; transform: rotate(-135deg);"></div>
+    </div>
+    <div class="boot-text">chintu is waking up...</div>
+    <div class="boot-loader"><div class="boot-bar" id="boot-bar"></div></div>
+  </div>
+  <!-- Popup for Gemini API Key -->
+  <div class="popup-modal" id="popup-modal" style="display:none;">
+    <form class="popup-card" id="ai-setup-form" autocomplete="off">
+      <div class="popup-title">Chintu needs your Gemini API key</div>
+      <div class="popup-desc">Paste your <b>Gemini (Google AI)</b> API key to chat with Chintu.<br>Your key is used only in your browser.</div>
+      <label class="popup-label" for="api-key">Gemini API Key</label>
+      <input type="password" id="api-key" placeholder="Paste Gemini API key" required autocomplete="off" />
+      <button type="submit">Start Chatting</button>
+    </form>
+  </div>
+  <!-- Main Chat App -->
+  <main class="chintu-container" id="chatbot-main" style="display:none;">
+    <div class="chintu-header">
+      <svg class="logo-sun" viewBox="0 0 110 110" fill="none">
+        <circle cx="55" cy="55" r="24" fill="#FFD000" stroke="#FFE480" stroke-width="4"/>
+        <ellipse cx="62" cy="60" rx="4" ry="1.5" fill="#fffbe6" opacity="0.7"/>
+      </svg>
+      Chintu AI
+      <span style="font-size:1rem;color:#e2b200;font-family:Poppins;font-weight:600;letter-spacing:0.2em;">sun ai</span>
+    </div>
+    <div class="messages" id="messages" aria-live="polite" aria-relevant="additions"></div>
+    <form id="chat-form" class="input-area" aria-label="Send message form" autocomplete="off">
+      <input type="text" id="user-input" placeholder="Send a message to Chintu..." autocomplete="off" aria-label="Type your message" required spellcheck="false" />
+      <button type="submit" aria-label="Send message">Send</button>
+    </form>
+  </main>
+  <script>
+    // Theme toggle logic
+    const htmlEl = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    const themeLabel = document.getElementById('theme-toggle-label');
+    const themeIcon = document.getElementById('theme-toggle-icon');
+    function setTheme(theme) {
+      htmlEl.setAttribute('data-theme', theme);
+      if(theme === 'dark') {
+        themeLabel.textContent = "Dark";
+        themeIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2a9.9 9.9 0 0 0 0 20A10 10 0 0 1 12 2Z" fill="#FFD000"/><circle cx="12" cy="12" r="9" stroke="#FFD000" stroke-width="2" fill="none"/></svg>';
+      } else {
+        themeLabel.textContent = "Light";
+        themeIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="6" fill="#FFD000"/><path stroke="#FFD000" stroke-width="2" d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.07-7.07l-1.42 1.42M6.35 17.66l-1.41 1.41m12.73 0l-1.42-1.41M6.34 6.34L4.93 4.93"/></svg>';
+      }
+      localStorage.setItem('theme', theme);
+    }
+    (function(){
+      let stored = localStorage.getItem('theme');
+      if(!stored){
+        stored = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark':'light';
+      }
+      setTheme(stored);
+    })();
+    themeBtn.onclick = () => {
+      const current = htmlEl.getAttribute('data-theme');
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    };
+
+    // Boot sequence logic
+    setTimeout(() => {
+      document.getElementById('boot-bar').style.width = '100%';
+      setTimeout(() => {
+        document.getElementById('boot-screen').style.display = 'none';
+        document.getElementById('popup-modal').style.display = 'flex';
+      }, 1800);
+    }, 500);
+
+    // Popup API Key submit
+    document.getElementById('ai-setup-form').addEventListener('submit', function(e){
+      e.preventDefault();
+      const key = document.getElementById('api-key').value.trim();
+      if (!key) return;
+      sessionStorage.setItem('geminiKey', key);
+      document.getElementById('popup-modal').style.display = 'none';
+      document.getElementById('chatbot-main').style.display = 'flex';
+      setTimeout(() => {
+        botReply("Hi! I'm <b>Chintu</b> ☀️, your friendly Sun AI. How can I help you today?");
+      }, 200);
+    });
+
+    // Chat logic
+    const messagesEl = document.getElementById('messages');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('user-input');
+
+    function createMessage(text, isUser = false) {
+      const div = document.createElement('div');
+      div.classList.add('message');
+      div.classList.add(isUser ? 'user-message' : 'bot-message');
+      // Simple HTML rendering for links and basic formatting
+      div.innerHTML = text.replace(/\n/g, "<br>");
+      return div;
+    }
+    function botReply(text) {
+      const typingDiv = document.getElementById('bot-typing');
+      if (typingDiv) typingDiv.remove();
+      const msg = createMessage(text, false);
+      messagesEl.appendChild(msg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+    function userMessage(text) {
+      const msg = createMessage(text, true);
+      messagesEl.appendChild(msg);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+    function showBotTyping() {
+      if (!document.getElementById('bot-typing')) {
+        const typing = document.createElement('div');
+        typing.className = 'bot-typing';
+        typing.id = 'bot-typing';
+        typing.textContent = 'Chintu is thinking...';
+        messagesEl.appendChild(typing);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+    }
+
+    // Maintain a conversation history for Gemini
+    let conversation = [
+      {
+        role: "user",
+        parts: [
+          { text: "You are Chintu, the Sun AI. You are extremely friendly, empathetic, and always speak with warmth and positivity also speak very less with fews words . Greet users kindly, answer all questions helpfully and simply, and never be rude. Add sun emojis ☀️ sometimes, and make users feel happy and cared for." }
+        ]
+      }
+    ];
+
+    async function getGeminiResponse(userInput) {
+      const key = sessionStorage.getItem('geminiKey');
+      if (!key) return "Gemini API key not found. Please reload.";
+      conversation.push({ role: "user", parts: [{ text: userInput }] });
+      try {
+        const response = await fetch(
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + encodeURIComponent(key),
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: conversation.slice(-8), // last 8 turns
+              generationConfig: {
+                temperature: 0.3,
+                topP: 0.95,
+                topK: 1,
+                maxOutputTokens: 512,
+                stopSequences: []
+              }
+            })
+          }
+        );
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          if (err && err.error && err.error.message) {
+            return "Gemini API error: " + err.error.message;
+          }
+          return "Gemini API error. Please check your API key.";
+        }
+        const data = await response.json();
+        const result = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text;
+        if (result) {
+          conversation.push({ role: "model", parts: [{ text: result }] });
+          return result;
+        }
+        return "Sorry, I couldn't get an answer from Gemini AI!";
+      } catch (e) {
+        return "Network error: " + (e.message || e);
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const userText = input.value.trim();
+      if (!userText) return;
+      userMessage(userText);
+      input.value = '';
+      setTimeout(showBotTyping, 300);
+      const reply = await getGeminiResponse(userText);
+      botReply(reply.replace(/\n/g, "<br>"));
+    });
+
+    // Auto focus input on chat start
+    document.getElementById('chatbot-main').addEventListener('transitionend', () => {
+      input && input.focus();
+    });
+  </script>
+</body>
+</html>
